@@ -1,10 +1,13 @@
 ﻿using Business.Abstract;
+using Business.Constants;
+using Core.Utilities.Results;
 using DataAccess.Abstract;
 using DataAccess.Concrete;
 using Entities.Concrete;
 using Entities.DTOs;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
   namespace Business.Concrete
@@ -18,73 +21,79 @@ using System.Text;
             _iCarDal = iCarDal;
         }
 
-        public void Add(Car car)
+        public IResult Add(Car car)
         {
             if(car.DailyPrice>0)
             {
                 _iCarDal.Add(car);
-                Console.WriteLine("Araba başarıyla eklendi");
+                return new SuccessResult(Messages.CarAdded);  
             }
             else
             {
-                Console.WriteLine($"Lütfen günlük fiyat kısmını 0'dan büyük giriniz. Girdiğiniz değer : {car.DailyPrice}");
-
-            }
+                return new ErrorResult(Messages.InvalidCar);
+            } 
         }
 
-        public void Delete(Car car)
+        public IResult Delete(Car car)
         {
             _iCarDal.Delete(car);
-            Console.WriteLine("Araba başarıyla silindi");
+            return new SuccessResult(Messages.DeleteCar);
+            
         }
 
-        public List<Car> GetAll()
+        public IDataResult<List<Car>> GetAll()
         {
-            return _iCarDal.GetAll();
+            if(DateTime.Now.Hour==22)
+            {
+                return new ErrorDataResult<List<Car>>(Messages.MaintenanceTime);
+            }
+            return new SuccessDataResult<List<Car>>(_iCarDal.GetAll(),Messages.CarsListed);
         }
 
-        public List<Car> GetAllByBrandId(int id)
+        public IDataResult<List<Car>> GetAllByBrandId(int id)
         {
-            return _iCarDal.GetAll(c => c.BrandId == id);
+            return new SuccessDataResult<List<Car>>(_iCarDal.GetAll(c => c.BrandId == id));
         }
 
-        public List<Car> GetAllByColorId(int id)
+        public IDataResult<List<Car>> GetAllByColorId(int id)
         {
-            return _iCarDal.GetAll(c => c.ColorId == id);
+            return new SuccessDataResult<List<Car>>(_iCarDal.GetAll(c => c.ColorId == id));
         }
 
-        public List<Car> GetAllByDailyPrice(decimal min, decimal max)
+        public IDataResult<List<Car>> GetAllByDailyPrice(decimal min, decimal max)
         {
-            return _iCarDal.GetAll(c => c.DailyPrice>=min && c.DailyPrice<=max);
+            return new SuccessDataResult<List<Car>>(_iCarDal.GetAll(c => c.DailyPrice>=min && c.DailyPrice<=max));
         }
 
-        public Car GetById(int id)
+        public IDataResult<Car> GetById(int id)
         {
-            return _iCarDal.Get(c => c.CarId == id);
+            return new SuccessDataResult<Car>(_iCarDal.Get(c => c.CarId == id));
         }
 
-        public List<Car> GetByModelYear(string year)
+        public IDataResult<List<Car>> GetByModelYear(string year)
         {
-            return _iCarDal.GetAll(c => c.ModelYear.Contains(year) == true);
+            return new SuccessDataResult<List<Car>>(_iCarDal.GetAll(c => c.ModelYear.Contains(year) == true));
         }
 
-        public List<CarDetailDto> GetCarDetails()
+        public IDataResult<List<CarDetailDto>> GetCarDetails(Expression<Func<Car, bool>> filter = null)
         {
-            return _iCarDal.GetCarDetails();
+            return new SuccessDataResult<List<CarDetailDto>>(_iCarDal.GetCarDetails(filter));
         }
 
-        public void Update(Car car)
+        public IResult Update(Car car)
         {
             if(car.DailyPrice>0)
             {
-                _iCarDal.Update(car);
-                Console.WriteLine("Araba başarıyla güncellendi");
+                _iCarDal.Update(car);                
+                return new SuccessResult(Messages.UpdateCar);
 
             }
             else
             {
-                Console.WriteLine($"Lütfen günlük fiyat kısmını 0'dan büyük giriniz. Girdiğiniz değer : {car.DailyPrice}");
+                return new ErrorResult(Messages.InvalidCar);
             }
         }
+
+
     }
 }
