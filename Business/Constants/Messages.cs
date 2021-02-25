@@ -34,6 +34,7 @@ namespace Business.Constants
         public static string RentalUpdated = "Araba kiralama işlemi güncellendi.";
         public static string RentalFailed = "Araba kiralama işlemi başarısız.";
         public static string RentalReturned = "Kiraladığınız araba teslim edildi.";
+        public static string DailyPriceInvalid = "Arabanın günlük fiyatı 0 ve altında olmamalıdır";
 
 
 
